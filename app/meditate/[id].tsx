@@ -37,6 +37,12 @@ const Meditate = () => {
         }
     }, [secondsRemaining, isMeditating]);
 
+    useEffect(() => {
+        return () => {
+            audioSound?.unloadAsync()
+        }
+    }, [audioSound]);
+
     const toggleMeditationSessionStatus = async () => {
         if (secondsRemaining === 0) setSecondsRemaining(10)
 
@@ -92,7 +98,9 @@ const Meditate = () => {
 
                     <View className='mb-5'>
                         <CustomButton onPress={toggleMeditationSessionStatus}
-                                      title={"Start Meditation"}/>
+                                      title="Adjust Duration"/>
+                        <CustomButton onPress={toggleMeditationSessionStatus}
+                                      title="Start Meditation" containerStyle="mt-4"/>
                     </View>
                 </AppGradient>
             </ImageBackground>
