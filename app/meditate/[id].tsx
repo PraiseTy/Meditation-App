@@ -1,5 +1,5 @@
 import {View, Text, ImageBackground, Pressable} from 'react-native'
-import React, {useEffect, useState} from 'react'
+import React, {useContext, useEffect, useState} from 'react'
 
 import MEDITATION_IMAGES from '@/constants/meditation-images'
 import AppGradient from "@/components/AppGradient";
@@ -8,10 +8,12 @@ import {AntDesign} from "@expo/vector-icons";
 import CustomButton from "@/components/CustomButton";
 import {Audio} from "expo-av"
 import {MEDITATION_DATA, AUDIO_FILES} from "@/constants/meditationData";
+import {TimerContext} from "@/context/TimerContext";
 
 const Meditate = () => {
     const {id} = useLocalSearchParams();
-    const [secondsRemaining, setSecondsRemaining] = useState(10)
+    const {duration: secondsRemaining, setDuration} = useContext(TimerContext);
+    // const [secondsRemaining, setSecondsRemaining] = useState(10)
     const [isMeditating, setIsMeditating] = useState(false)
     const [audioSound, setSound] = useState<Audio.Sound>()
     const [isPlayingAudio, setPlayingAudio] = useState(false)
@@ -27,7 +29,7 @@ const Meditate = () => {
 
         if (isMeditating) {
             timerId = setTimeout(() => {
-                setSecondsRemaining(secondsRemaining - 1)
+                setDuration(secondsRemaining - 1)
             }, 1000);
         }
 
@@ -39,12 +41,13 @@ const Meditate = () => {
 
     useEffect(() => {
         return () => {
+            setDuration(10)
             audioSound?.unloadAsync()
         }
     }, [audioSound]);
 
     const toggleMeditationSessionStatus = async () => {
-        if (secondsRemaining === 0) setSecondsRemaining(10)
+        if (secondsRemaining === 0) setDuration(10)
 
         setIsMeditating(!isMeditating)
 
@@ -78,6 +81,13 @@ const Meditate = () => {
         return sound
     }
 
+    const handleAdjustDuration =  () => {
+        if (!isMeditating) toggleMeditationSessionStatus();
+
+        router.push("/(modal)/adjust-meditation-duration")
+
+    }
+
     // Format the time left to ensure two digits are displayed
     const formattedTimeMinutes = String(Math.floor(secondsRemaining / 60)).padStart(2, "0");
     const formattedTimeSeconds = String(secondsRemaining % 60).padStart(2, "0");
@@ -97,10 +107,10 @@ const Meditate = () => {
                     </View>
 
                     <View className='mb-5'>
-                        <CustomButton onPress={toggleMeditationSessionStatus}
+                        <CustomButton onPress={handleAdjustDuration}
                                       title="Adjust Duration"/>
                         <CustomButton onPress={toggleMeditationSessionStatus}
-                                      title="Start Meditation" containerStyle="mt-4"/>
+                                      title={isMeditating ? 'Stop Meditating' : 'Start Meditating'} containerStyle="mt-4"/>
                     </View>
                 </AppGradient>
             </ImageBackground>
